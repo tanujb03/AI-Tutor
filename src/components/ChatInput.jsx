@@ -57,7 +57,7 @@ export function ChatInput({ onSendMessage, isStreaming, onStop, selectedScenario
           >
             <Bookmark className="w-3 h-3 text-primary fill-primary/30" />
             <span>Saved Deck</span>
-            <span className="px-1.5 py-0.2 bg-primary-container text-on-primary-container text-[10px] font-bold rounded-full">
+            <span className="px-1.5 py-0.2 bg-primary-container text-on-primary-container text-[10px] font-bold rounded">
               {savedCount || 0}
             </span>
           </button>

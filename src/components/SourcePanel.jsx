@@ -46,8 +46,8 @@ export function SourcePanel({ selectedCitation, lectures, onCloseMobile }) {
     if (!selectedCitation || !slide) {
       return (
         <div className="h-full flex flex-col items-center justify-center p-8 text-center text-on-surface-variant space-y-3 my-auto">
-          <div className="w-12 h-12 rounded-full bg-surface-container-high border border-outline-variant/60 flex items-center justify-center text-outline">
-            <BookOpen className="w-6 h-6" />
+          <div className="w-10 h-10 rounded-md bg-surface-container-high border border-outline-variant/60 flex items-center justify-center text-outline">
+            <BookOpen className="w-5 h-5" />
           </div>
           <h3 className="text-sm font-semibold text-on-surface">No Slide Selected</h3>
           <p className="text-xs text-on-surface-variant max-w-xs leading-relaxed">

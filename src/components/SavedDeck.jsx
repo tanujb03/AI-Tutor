@@ -74,7 +74,7 @@ export function SavedDeck({ savedMessages, lectures, onRemoveSaved, onCitationCl
             <div>
               <h2 className="text-sm font-semibold text-on-surface flex items-center gap-2">
                 <span>Saved Study Deck</span>
-                <span className="text-[10px] font-mono px-2 py-0.5 bg-primary-container text-on-primary-container font-bold rounded-full">
+                <span className="text-[10px] font-mono px-2 py-0.5 bg-primary-container text-on-primary-container font-bold rounded">
                   {savedMessages.length} {savedMessages.length === 1 ? 'item' : 'items'}
                 </span>
               </h2>
@@ -97,8 +97,8 @@ export function SavedDeck({ savedMessages, lectures, onRemoveSaved, onCitationCl
           {savedMessages.length === 0 ? (
             /* EMPTY STATE */
             <div className="py-16 text-center text-on-surface-variant space-y-3">
-              <div className="w-12 h-12 rounded-full bg-surface-container-high border border-outline-variant/60 flex items-center justify-center text-outline mx-auto">
-                <Bookmark className="w-6 h-6" />
+              <div className="w-10 h-10 rounded-md bg-surface-container-high border border-outline-variant/60 flex items-center justify-center text-outline mx-auto">
+                <Bookmark className="w-5 h-5" />
               </div>
               <h3 className="text-sm font-semibold text-on-surface">Nothing saved yet</h3>
               <p className="text-xs text-on-surface-variant max-w-sm mx-auto leading-relaxed">
