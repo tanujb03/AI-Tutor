@@ -97,23 +97,21 @@ export function SourcePanel({ selectedCitation, lectures, onCloseMobile }) {
                     animate={
                       isCitedBullet && flashHighlight
                         ? {
-                            backgroundColor: ['#201f1f', '#0080802b', '#201f1f'],
-                            borderColor: ['#3e4949', '#76d6d5', '#3e4949'],
-                            scale: [1, 1.015, 1],
-                          }
+                          backgroundColor: ['#201f1f', '#0080802b', '#201f1f'],
+                          borderColor: ['#3e4949', '#76d6d5', '#3e4949'],
+                          scale: [1, 1.015, 1],
+                        }
                         : {}
                     }
                     transition={{ duration: 1.4, ease: 'easeInOut' }}
-                    className={`p-3 rounded text-xs leading-relaxed border transition-all ${
-                      isCitedBullet
-                        ? 'bg-primary-container/10 border-primary/40 text-on-surface shadow-sm'
-                        : 'bg-surface-container-low border-outline-variant/40 text-on-surface-variant'
-                    }`}
+                    className={`p-3 rounded text-xs leading-relaxed border transition-all ${isCitedBullet
+                      ? 'bg-primary-container/10 border-primary/40 text-on-surface shadow-sm'
+                      : 'bg-surface-container-low border-outline-variant/40 text-on-surface-variant'
+                      }`}
                   >
                     <div className="flex items-start space-x-2">
-                      <span className={`mt-0.5 font-bold font-mono text-[10px] px-1 py-0.5 rounded ${
-                        isCitedBullet ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-outline'
-                      }`}>
+                      <span className={`mt-0.5 font-bold font-mono text-[10px] px-1 py-0.5 rounded ${isCitedBullet ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-outline'
+                        }`}>
                         {idx + 1}
                       </span>
                       <div className="flex-1 space-y-1">
