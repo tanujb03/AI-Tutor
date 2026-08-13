@@ -5,7 +5,7 @@ import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import { BookOpen, RefreshCw, MessageSquare } from 'lucide-react';
 
-export function ChatInterface({ onCitationClick }) {
+export function ChatInterface({ onCitationClick, selectedCitation }) {
   const [messages, setMessages] = useState(initialConversation.messages || []);
   const [isStreaming, setIsStreaming] = useState(false);
   const [selectedScenario, setSelectedScenario] = useState('plain');
@@ -192,6 +192,7 @@ export function ChatInterface({ onCitationClick }) {
               isStreaming={isStreaming && idx === messages.length - 1 && (msg.role === 'assistant' || msg.sender === 'tutor')}
               onRetry={() => handleRetry(idx)}
               onCitationClick={onCitationClick}
+              selectedCitation={selectedCitation}
             />
           ))
         )}

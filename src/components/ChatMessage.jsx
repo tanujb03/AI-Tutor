@@ -21,7 +21,7 @@ function formatCitationLabel(citation, index) {
   };
 }
 
-export function ChatMessage({ message, isStreaming, onRetry, onCitationClick }) {
+export function ChatMessage({ message, isStreaming, onRetry, onCitationClick, selectedCitation }) {
   const isUser = message.role === 'user' || message.sender === 'user';
   const isAssistant = !isUser;
   const isErrorMidstream = message.error && message.content && message.content.length > 0;
@@ -104,15 +104,27 @@ export function ChatMessage({ message, isStreaming, onRetry, onCitationClick }) 
           </span>
           {message.citations.map((citation, idx) => {
             const formatted = formatCitationLabel(citation, idx);
+            const isSelected = selectedCitation && 
+              selectedCitation.lecture === citation.lecture && 
+              Number(selectedCitation.slide) === Number(citation.slide);
+
             return (
               <button
                 key={idx}
                 onClick={() => onCitationClick && onCitationClick(citation)}
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/60 hover:border-primary text-primary text-xs font-mono rounded transition-colors"
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono rounded transition-all ${
+                  isSelected
+                    ? 'bg-primary-container text-on-primary-container border-2 border-primary font-bold shadow-md scale-105'
+                    : 'bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/60 hover:border-primary text-primary'
+                }`}
                 title={`Jump to ${citation.lecture} - Slide ${citation.slide}`}
               >
-                <span className="font-bold text-primary">[{formatted.num}]</span>
-                <span className="text-on-surface-variant">{formatted.label}</span>
+                <span className={`font-bold ${isSelected ? 'text-on-primary-container' : 'text-primary'}`}>
+                  [{formatted.num}]
+                </span>
+                <span className={isSelected ? 'text-on-primary-container' : 'text-on-surface-variant'}>
+                  {formatted.label}
+                </span>
               </button>
             );
           })}
