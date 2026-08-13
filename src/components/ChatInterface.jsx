@@ -6,7 +6,7 @@ import ChatInput from './ChatInput';
 import CoverageStrip from './CoverageStrip';
 import { BookOpen, RefreshCw, MessageSquare } from 'lucide-react';
 
-export function ChatInterface({ onCitationClick, selectedCitation, lectures }) {
+export function ChatInterface({ onCitationClick, selectedCitation, lectures, savedMessages = [], onToggleSave, onOpenSavedDeck }) {
   const [messages, setMessages] = useState(initialConversation.messages || []);
   const [isStreaming, setIsStreaming] = useState(false);
   const [selectedScenario, setSelectedScenario] = useState('plain');
@@ -194,16 +194,21 @@ export function ChatInterface({ onCitationClick, selectedCitation, lectures }) {
             <p className="text-sm font-medium">No messages yet. Ask a question to start!</p>
           </div>
         ) : (
-          messages.map((msg, idx) => (
-            <ChatMessage
-              key={msg.id || idx}
-              message={msg}
-              isStreaming={isStreaming && idx === messages.length - 1 && (msg.role === 'assistant' || msg.sender === 'tutor')}
-              onRetry={() => handleRetry(idx)}
-              onCitationClick={onCitationClick}
-              selectedCitation={selectedCitation}
-            />
-          ))
+          messages.map((msg, idx) => {
+            const isSaved = savedMessages.some((m) => m.id === msg.id);
+            return (
+              <ChatMessage
+                key={msg.id || idx}
+                message={msg}
+                isStreaming={isStreaming && idx === messages.length - 1 && (msg.role === 'assistant' || msg.sender === 'tutor')}
+                onRetry={() => handleRetry(idx)}
+                onCitationClick={onCitationClick}
+                selectedCitation={selectedCitation}
+                isSaved={isSaved}
+                onToggleSave={onToggleSave}
+              />
+            );
+          })
         )}
         <div ref={messagesEndRef} />
       </main>
@@ -215,6 +220,8 @@ export function ChatInterface({ onCitationClick, selectedCitation, lectures }) {
         onStop={handleStop}
         selectedScenario={selectedScenario}
         setSelectedScenario={setSelectedScenario}
+        savedCount={savedMessages.length}
+        onOpenSavedDeck={onOpenSavedDeck}
       />
     </div>
   );

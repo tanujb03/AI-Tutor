@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Send, Square, Play, Sparkles } from 'lucide-react';
+import { Send, Square, Play, Sparkles, Bookmark } from 'lucide-react';
 import { listScenarios } from '../data/mock-stream.mjs';
 
-export function ChatInput({ onSendMessage, isStreaming, onStop, selectedScenario, setSelectedScenario }) {
+export function ChatInput({ onSendMessage, isStreaming, onStop, selectedScenario, setSelectedScenario, savedCount, onOpenSavedDeck }) {
   const [promptText, setPromptText] = useState('');
   const scenarios = listScenarios();
 
@@ -27,12 +27,12 @@ export function ChatInput({ onSendMessage, isStreaming, onStop, selectedScenario
   return (
     <div className="sticky bottom-0 bg-background/95 backdrop-blur-md pt-3 pb-6 border-t border-outline-variant/40">
       <div className="max-w-3xl mx-auto space-y-2">
-        {/* Top bar controls: Scenario Selector Dropdown */}
+        {/* Top bar controls: Scenario Selector Dropdown & Saved Deck Tab Button */}
         <div className="flex items-center justify-between text-xs px-1">
           <div className="flex items-center space-x-2">
             <span className="text-on-surface-variant font-mono uppercase text-[10px] tracking-wider flex items-center gap-1">
               <Sparkles className="w-3 h-3 text-primary" />
-              Mock Scenario:
+              Scenario:
             </span>
             <select
               value={selectedScenario}
@@ -42,15 +42,25 @@ export function ChatInput({ onSendMessage, isStreaming, onStop, selectedScenario
             >
               {scenarios.map((sc) => (
                 <option key={sc.id} value={sc.id}>
-                  {sc.id} — "{sc.prompt.substring(0, 35)}..."
+                  {sc.id} — "{sc.prompt.substring(0, 30)}..."
                 </option>
               ))}
             </select>
           </div>
 
-          <span className="text-[11px] text-outline font-mono hidden sm:inline">
-            Press Enter to submit
-          </span>
+          {/* Saved Deck Trigger Tab Button */}
+          <button
+            type="button"
+            onClick={onOpenSavedDeck}
+            className="inline-flex items-center space-x-1.5 px-2.5 py-1 bg-surface-container-high hover:bg-surface-container-highest text-on-surface border border-outline-variant/60 hover:border-primary rounded text-xs font-mono transition-colors"
+            title="Open Saved Study Deck"
+          >
+            <Bookmark className="w-3 h-3 text-primary fill-primary/30" />
+            <span>Saved Deck</span>
+            <span className="px-1.5 py-0.2 bg-primary-container text-on-primary-container text-[10px] font-bold rounded-full">
+              {savedCount || 0}
+            </span>
+          </button>
         </div>
 
         {/* Form Input Box */}

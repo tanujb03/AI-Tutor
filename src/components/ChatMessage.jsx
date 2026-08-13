@@ -21,7 +21,7 @@ function formatCitationLabel(citation, index) {
   };
 }
 
-export function ChatMessage({ message, isStreaming, onRetry, onCitationClick, selectedCitation }) {
+export function ChatMessage({ message, isStreaming, onRetry, onCitationClick, selectedCitation, isSaved, onToggleSave }) {
   const isUser = message.role === 'user' || message.sender === 'user';
   const isAssistant = !isUser;
   const isErrorMidstream = message.error && message.content && message.content.length > 0;
@@ -79,10 +79,31 @@ export function ChatMessage({ message, isStreaming, onRetry, onCitationClick, se
       animate={{ opacity: 1 }}
       className="my-6 max-w-3xl space-y-3"
     >
-      {/* Header Label */}
-      <div className="flex items-center space-x-2 text-xs text-on-surface-variant font-mono uppercase tracking-wider mb-1">
-        <span className="w-2 h-2 rounded-full bg-primary" />
-        <span className="font-semibold text-primary">CS 4780 Tutor</span>
+      {/* Header Label & Bookmark Action */}
+      <div className="flex items-center justify-between text-xs text-on-surface-variant font-mono uppercase tracking-wider mb-1">
+        <div className="flex items-center space-x-2">
+          <span className="w-2 h-2 rounded-full bg-primary" />
+          <span className="font-semibold text-primary">CS 4780 Tutor</span>
+        </div>
+
+        {/* Bookmark Save Button with micro-interaction pulse */}
+        {onToggleSave && !isStreaming && (
+          <motion.button
+            whileTap={{ scale: 0.85 }}
+            animate={isSaved ? { scale: [1, 1.35, 1] } : { scale: 1 }}
+            transition={{ duration: 0.3 }}
+            onClick={() => onToggleSave(message)}
+            className={`inline-flex items-center space-x-1 px-2 py-0.5 rounded text-[11px] font-mono border transition-all ${
+              isSaved
+                ? 'bg-primary-container text-on-primary-container border-primary font-semibold shadow-sm'
+                : 'bg-surface-container-high border-outline-variant/60 text-on-surface-variant hover:text-primary hover:border-primary'
+            }`}
+            title={isSaved ? 'Remove from Saved Deck' : 'Save to Study Deck'}
+          >
+            <Bookmark className={`w-3 h-3 ${isSaved ? 'fill-current text-on-primary-container' : ''}`} />
+            <span>{isSaved ? 'Saved' : 'Save'}</span>
+          </motion.button>
+        )}
       </div>
 
       {/* Document Content */}
