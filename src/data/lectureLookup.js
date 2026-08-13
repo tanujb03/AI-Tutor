@@ -26,40 +26,54 @@ export function findSlide(citation, lectures) {
     return null;
   }
 
-  // Determine the target week number
+  // Determine target week number from week property or "Week X" regex match
   let targetWeek = null;
 
   if (typeof citation.week === 'number') {
     targetWeek = citation.week;
   } else if (typeof citation.lecture === 'string') {
-    // Regex matching: find "Week" followed by whitespace and numbers (case insensitive)
     const match = citation.lecture.match(/Week\s*(\d+)/i);
     if (match) {
       targetWeek = parseInt(match[1], 10);
     }
   }
 
-  if (targetWeek === null) {
-    return null;
+  let targetLecture = null;
+
+  // Primary strategy: Match by parsed week number
+  if (targetWeek !== null) {
+    targetLecture = lectures.find((lec) => Number(lec.week) === targetWeek);
   }
 
-  // 1. Find the target lecture object by week number (avoiding fragile string comparison on titles)
-  const targetLecture = lectures.find((lec) => Number(lec.week) === targetWeek);
+  // Fallback 1: Match by lecture ID / lecture_id
+  if (!targetLecture && (citation.lectureId || citation.id)) {
+    const targetId = citation.lectureId || citation.id;
+    targetLecture = lectures.find((lec) => lec.id === targetId || lec.lecture_id === targetId);
+  }
+
+  // Fallback 2: Match by title substring similarity
+  if (!targetLecture && typeof citation.lecture === 'string') {
+    const citationTitleLower = citation.lecture.toLowerCase();
+    targetLecture = lectures.find((lec) => {
+      const lecTitleLower = (lec.title || '').toLowerCase();
+      return lecTitleLower.includes(citationTitleLower) || citationTitleLower.includes(lecTitleLower);
+    });
+  }
 
   if (!targetLecture || !Array.isArray(targetLecture.slides)) {
     return null;
   }
 
-  // Determine the target slide number from citation
+  // Determine target slide number from citation
   const targetSlideNum = citation.slide ?? citation.slide_number ?? citation.slideNumber;
 
   if (targetSlideNum === undefined || targetSlideNum === null) {
     return null;
   }
 
-  // 2. Find the slide matching the target slide number
+  // Match slide by slide_number or slideNumber
   const matchedSlide = targetLecture.slides.find(
-    (slide) => (slide.slide_number ?? slide.slideNumber) === Number(targetSlideNum)
+    (slide) => Number(slide.slide_number ?? slide.slideNumber) === Number(targetSlideNum)
   );
 
   return matchedSlide || null;

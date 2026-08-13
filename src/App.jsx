@@ -35,7 +35,11 @@ export default function App() {
   }, [savedMessages]);
 
   const handleCitationClick = (citation) => {
-    setSelectedCitation(citation);
+    if (!citation) return;
+    // Create a fresh object reference so useEffect inside SourcePanel always re-runs
+    setSelectedCitation({ ...citation });
+    // Switch active mobile tab to 'sources' on small viewports
+    setActiveMobileTab('sources');
   };
 
   const handleCloseMobile = () => {
@@ -58,9 +62,9 @@ export default function App() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-background text-on-surface overflow-x-hidden font-sans">
+    <div className="flex flex-col lg:flex-row h-screen overflow-hidden bg-background text-on-surface font-sans">
       {/* MOBILE TOP TAB BAR (Shown only on < lg screens replacing desktop split view) */}
-      <div className="lg:hidden sticky top-0 z-20 bg-background/95 backdrop-blur-md border-b border-outline-variant/60 px-4 py-2 flex items-center justify-center">
+      <div className="lg:hidden shrink-0 z-20 bg-background/95 backdrop-blur-md border-b border-outline-variant/60 px-4 py-2 flex items-center justify-center">
         <div className="flex bg-surface-container-high p-1 rounded-lg border border-outline-variant/60 w-full max-w-xs text-xs font-mono">
           <button
             onClick={() => setActiveMobileTab('chat')}
@@ -92,7 +96,7 @@ export default function App() {
       </div>
 
       {/* CENTER / LEFT CHAT AREA */}
-      <div className={`flex-1 min-w-0 flex flex-col ${activeMobileTab === 'chat' ? 'flex' : 'hidden lg:flex'}`}>
+      <div className={`flex-1 min-w-0 overflow-hidden ${activeMobileTab === 'chat' ? 'flex flex-col' : 'hidden lg:flex lg:flex-col'}`}>
         <ChatInterface 
           onCitationClick={handleCitationClick} 
           selectedCitation={selectedCitation}
@@ -105,7 +109,7 @@ export default function App() {
 
       {/* FULL MOBILE SOURCES TAB VIEW (When activeMobileTab === 'sources' on mobile) */}
       {activeMobileTab === 'sources' && (
-        <div className="lg:hidden flex-1 p-4 bg-background min-h-[calc(100vh-50px)]">
+        <div className="lg:hidden flex-1 overflow-hidden p-4 bg-background">
           <SourcePanel
             selectedCitation={selectedCitation}
             lectures={lectures}

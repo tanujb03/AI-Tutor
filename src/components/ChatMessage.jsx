@@ -108,11 +108,21 @@ export function ChatMessage({ message, isStreaming, onRetry, onCitationClick, se
 
       {/* Document Content */}
       <div className="relative text-on-surface">
-        <MathMarkdown content={message.content} isStreaming={isStreaming} />
-        
-        {/* Blinking Cursor during streaming */}
-        {isStreaming && (
-          <span className="inline-block w-2 h-4 bg-primary ml-1 animate-pulse align-middle" />
+        {isStreaming && (!message.content || message.content.length === 0) ? (
+          <div className="my-3 p-3.5 bg-surface-container-low border border-primary/40 rounded-md text-xs font-mono text-primary flex items-center space-x-3 shadow-sm animate-pulse max-w-md">
+            <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin shrink-0" />
+            <div className="space-y-0.5">
+              <div className="font-semibold text-primary">Thinking & retrieving lecture slides...</div>
+              <div className="text-[10px] text-on-surface-variant">Synthesizing response from course materials...</div>
+            </div>
+          </div>
+        ) : (
+          <>
+            <MathMarkdown content={message.content} isStreaming={isStreaming} />
+            {isStreaming && (
+              <span className="inline-block w-2 h-4 bg-primary ml-1 animate-pulse align-middle" />
+            )}
+          </>
         )}
       </div>
 

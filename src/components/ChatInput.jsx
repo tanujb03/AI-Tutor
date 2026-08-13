@@ -3,16 +3,26 @@ import { Send, Square, Play, Sparkles, Bookmark } from 'lucide-react';
 import { listScenarios } from '../data/mock-stream.mjs';
 
 export function ChatInput({ onSendMessage, isStreaming, onStop, selectedScenario, setSelectedScenario, savedCount, onOpenSavedDeck }) {
-  const [promptText, setPromptText] = useState('');
   const scenarios = listScenarios();
+
+  const [promptText, setPromptText] = useState(() => {
+    const found = scenarios.find((s) => s.id === selectedScenario);
+    return found ? found.prompt : '';
+  });
 
   const handleScenarioChange = (e) => {
     const newScenarioId = e.target.value;
     setSelectedScenario(newScenarioId);
     
-    // Auto populate prompt text matching scenario prompt for quick testing
     const found = scenarios.find((s) => s.id === newScenarioId);
     if (found) {
+      setPromptText(found.prompt);
+    }
+  };
+
+  const handleSelectClick = () => {
+    const found = scenarios.find((s) => s.id === selectedScenario);
+    if (found && !promptText.trim()) {
       setPromptText(found.prompt);
     }
   };
@@ -37,8 +47,9 @@ export function ChatInput({ onSendMessage, isStreaming, onStop, selectedScenario
             <select
               value={selectedScenario}
               onChange={handleScenarioChange}
+              onClick={handleSelectClick}
               disabled={isStreaming}
-              className="bg-surface-container-high text-on-surface border border-outline-variant/60 rounded px-2.5 py-1 text-xs font-mono focus:outline-none focus:border-primary disabled:opacity-50"
+              className="bg-surface-container-high text-on-surface border border-outline-variant/60 rounded px-2.5 py-1 text-xs font-mono focus:outline-none focus:border-primary disabled:opacity-50 cursor-pointer"
             >
               {scenarios.map((sc) => (
                 <option key={sc.id} value={sc.id}>

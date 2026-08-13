@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { findSlide } from '../data/lectureLookup';
 import { BlockMath, InlineMath } from 'react-katex';
-import { BookOpen, X, ChevronRight, FileText, Sparkles, Image, CheckCircle2 } from 'lucide-react';
+import { BookOpen, X, ChevronRight, FileText, Sparkles, Image } from 'lucide-react';
 
 /**
  * SourcePanel Component
@@ -10,7 +10,7 @@ import { BookOpen, X, ChevronRight, FileText, Sparkles, Image, CheckCircle2 } fr
  * Displays the cited slide details retrieved via findSlide(citation, lectures).
  * Handles desktop right-side persistent panel and mobile bottom sheet overlay with spring animations.
  */
-export function SourcePanel({ selectedCitation, lectures, onCloseMobile }) {
+export function SourcePanel({ selectedCitation, lectures, onCloseMobile, isMobileFullTab = false }) {
   const [slide, setSlide] = useState(null);
   const [targetLecture, setTargetLecture] = useState(null);
   const [flashHighlight, setFlashHighlight] = useState(false);
@@ -114,14 +114,8 @@ export function SourcePanel({ selectedCitation, lectures, onCloseMobile }) {
                         }`}>
                         {idx + 1}
                       </span>
-                      <div className="flex-1 space-y-1">
+                      <div className="flex-1">
                         <p>{bullet}</p>
-                        {isCitedBullet && (
-                          <div className="text-[10px] font-mono text-primary flex items-center gap-1 mt-1 font-semibold">
-                            <CheckCircle2 className="w-3 h-3 text-primary" />
-                            <span>Direct Citation Match</span>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </motion.div>
@@ -143,9 +137,9 @@ export function SourcePanel({ selectedCitation, lectures, onCloseMobile }) {
               {slide.formulas.map((formula, fIdx) => (
                 <div
                   key={fIdx}
-                  className="p-3 bg-surface-container-lowest border border-outline-variant/60 rounded text-center overflow-x-auto text-primary text-xs"
+                  className="p-3 bg-surface-container-lowest border border-outline-variant/60 rounded overflow-x-auto overflow-y-hidden text-primary"
                 >
-                  <BlockMath math={formula} />
+                  <BlockMath math={String(formula)} errorColor="#ff6b6b" />
                 </div>
               ))}
             </div>
@@ -170,13 +164,37 @@ export function SourcePanel({ selectedCitation, lectures, onCloseMobile }) {
           <div className="p-3 bg-surface-container-low border border-outline-variant/40 rounded space-y-1 text-xs">
             <div className="text-[10px] font-mono uppercase text-outline">Pedagogical Notes:</div>
             <p className="text-on-surface-variant text-[11px] italic leading-relaxed">
-              "{slide.notes}"
+              {slide.notes}
             </p>
           </div>
         )}
       </div>
     );
   };
+
+  // Mobile full-tab: render just the panel content (no aside/bottom-sheet wrapper)
+  if (isMobileFullTab) {
+    return (
+      <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-xl h-full flex flex-col overflow-hidden">
+        <div className="px-4 py-3 border-b border-outline-variant/60 flex items-center justify-between bg-surface-container-low/80 shrink-0">
+          <div className="flex items-center space-x-2">
+            <BookOpen className="w-4 h-4 text-primary" />
+            <span className="text-xs font-semibold text-on-surface font-sans uppercase tracking-wider">
+              Slide Source Viewer
+            </span>
+          </div>
+          {slide && (
+            <span className="text-[10px] font-mono px-2 py-0.5 bg-primary-container/20 text-primary border border-primary/40 rounded">
+              Active Slide
+            </span>
+          )}
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          {renderPanelContent()}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

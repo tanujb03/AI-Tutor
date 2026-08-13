@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import initialConversation from '../data/conversation.json';
-import { getScenario, listScenarios } from '../data/mock-stream.mjs';
+import { streamResponse, getScenario, listScenarios } from '../data/mock-stream.mjs';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import CoverageStrip from './CoverageStrip';
@@ -142,13 +142,20 @@ export function ChatInterface({ onCitationClick, selectedCitation, lectures, sav
   };
 
   const handleResetConversation = () => {
-    setMessages(initialConversation.messages || []);
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    setIsStreaming(false);
+    setMessages(JSON.parse(JSON.stringify(initialConversation.messages || [])));
+    if (onCitationClick) {
+      onCitationClick(null);
+    }
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-on-surface font-sans">
-      {/* Navigation Header */}
-      <header className="sticky top-0 z-10 bg-background/90 backdrop-blur-md border-b border-outline-variant/50 px-6 py-3">
+    <div className="flex flex-col h-screen overflow-hidden bg-background text-on-surface font-sans">
+      {/* Navigation Header — fixed at top, never scrolls away */}
+      <header className="shrink-0 bg-background/90 backdrop-blur-md border-b border-outline-variant/50 px-6 py-3 z-10">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className="w-7 h-7 rounded bg-primary-container flex items-center justify-center text-on-primary-container font-mono font-bold text-xs">
@@ -178,51 +185,57 @@ export function ChatInterface({ onCitationClick, selectedCitation, lectures, sav
         </div>
       </header>
 
-      {/* Live Coverage Strip */}
-      <CoverageStrip 
-        messages={messages}
-        lectures={lectures}
-        isStreaming={isStreaming}
-        onSlideSelect={onCitationClick}
-      />
+      {/* Live Coverage Strip — also shrinks to its content height */}
+      <div className="shrink-0">
+        <CoverageStrip
+          messages={messages}
+          lectures={lectures}
+          isStreaming={isStreaming}
+          onSlideSelect={onCitationClick}
+        />
+      </div>
 
-      {/* Main Chat Scroll Region */}
-      <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-6 space-y-4">
-        {messages.length === 0 ? (
-          <div className="text-center py-16 text-on-surface-variant space-y-3">
-            <MessageSquare className="w-8 h-8 text-outline mx-auto" />
-            <p className="text-sm font-medium">No messages yet. Ask a question to start!</p>
-          </div>
-        ) : (
-          messages.map((msg, idx) => {
-            const isSaved = savedMessages.some((m) => m.id === msg.id);
-            return (
-              <ChatMessage
-                key={msg.id || idx}
-                message={msg}
-                isStreaming={isStreaming && idx === messages.length - 1 && (msg.role === 'assistant' || msg.sender === 'tutor')}
-                onRetry={() => handleRetry(idx)}
-                onCitationClick={onCitationClick}
-                selectedCitation={selectedCitation}
-                isSaved={isSaved}
-                onToggleSave={onToggleSave}
-              />
-            );
-          })
-        )}
-        <div ref={messagesEndRef} />
+      {/* Main Chat Scroll Region — flex-1 so it fills the remaining height, overflow-y-auto for scroll */}
+      <main className="flex-1 overflow-y-auto">
+        <div className="max-w-3xl w-full mx-auto px-4 py-6 space-y-4">
+          {messages.length === 0 ? (
+            <div className="text-center py-16 text-on-surface-variant space-y-3">
+              <MessageSquare className="w-8 h-8 text-outline mx-auto" />
+              <p className="text-sm font-medium">No messages yet. Ask a question to start!</p>
+            </div>
+          ) : (
+            messages.map((msg, idx) => {
+              const isSaved = savedMessages.some((m) => m.id === msg.id);
+              return (
+                <ChatMessage
+                  key={msg.id || idx}
+                  message={msg}
+                  isStreaming={isStreaming && idx === messages.length - 1 && (msg.role === 'assistant' || msg.sender === 'tutor')}
+                  onRetry={() => handleRetry(idx)}
+                  onCitationClick={onCitationClick}
+                  selectedCitation={selectedCitation}
+                  isSaved={isSaved}
+                  onToggleSave={onToggleSave}
+                />
+              );
+            })
+          )}
+          <div ref={messagesEndRef} />
+        </div>
       </main>
 
-      {/* Pinned Bottom Input Bar */}
-      <ChatInput
-        onSendMessage={handleSendMessage}
-        isStreaming={isStreaming}
-        onStop={handleStop}
-        selectedScenario={selectedScenario}
-        setSelectedScenario={setSelectedScenario}
-        savedCount={savedMessages.length}
-        onOpenSavedDeck={onOpenSavedDeck}
-      />
+      {/* Pinned Bottom Input Bar — shrinks to content, never scrolls away */}
+      <div className="shrink-0">
+        <ChatInput
+          onSendMessage={handleSendMessage}
+          isStreaming={isStreaming}
+          onStop={handleStop}
+          selectedScenario={selectedScenario}
+          setSelectedScenario={setSelectedScenario}
+          savedCount={savedMessages.length}
+          onOpenSavedDeck={onOpenSavedDeck}
+        />
+      </div>
     </div>
   );
 }

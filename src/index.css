@@ -25,3 +25,8 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #879392;
 }
+
+/* Suppress KaTeX's MathML accessibility annotation from rendering as visible plain text */
+.katex .katex-mathml {
+  display: none !important;
+}

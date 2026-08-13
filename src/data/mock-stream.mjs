@@ -76,16 +76,16 @@ function chunkify(text) {
 export async function* streamResponse(id, opts = {}) {
   const { signal, speed = 1 } = opts
   const scenario = getScenario(id)
+
+  // fails_before_first_token: fails immediately before any delay or token emission.
+  if (scenario.error && scenario.fails_before_first_token) {
+    throw new Error(scenario.error)
+  }
+
   const chunks = chunkify(scenario.text)
 
   await sleep(scenario.first_token_delay_ms * speed)
   if (signal?.aborted) return
-
-  // fails_before_first_token: nothing is ever yielded. Distinct from failing partway,
-  // because there is no half-written message to decide what to do with.
-  if (scenario.error && scenario.fails_before_first_token) {
-    throw new Error(scenario.error)
-  }
 
   for (const chunk of chunks) {
     if (signal?.aborted) return
