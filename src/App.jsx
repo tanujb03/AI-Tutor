@@ -26,6 +26,7 @@ export default function App() {
         <ChatInterface 
           onCitationClick={handleCitationClick} 
           selectedCitation={selectedCitation}
+          lectures={lectures}
         />
       </div>
 

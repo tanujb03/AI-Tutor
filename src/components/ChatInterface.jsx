@@ -3,9 +3,10 @@ import initialConversation from '../data/conversation.json';
 import { getScenario, listScenarios } from '../data/mock-stream.mjs';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
+import CoverageStrip from './CoverageStrip';
 import { BookOpen, RefreshCw, MessageSquare } from 'lucide-react';
 
-export function ChatInterface({ onCitationClick, selectedCitation }) {
+export function ChatInterface({ onCitationClick, selectedCitation, lectures }) {
   const [messages, setMessages] = useState(initialConversation.messages || []);
   const [isStreaming, setIsStreaming] = useState(false);
   const [selectedScenario, setSelectedScenario] = useState('plain');
@@ -176,6 +177,14 @@ export function ChatInterface({ onCitationClick, selectedCitation }) {
           </button>
         </div>
       </header>
+
+      {/* Live Coverage Strip */}
+      <CoverageStrip 
+        messages={messages}
+        lectures={lectures}
+        isStreaming={isStreaming}
+        onSlideSelect={onCitationClick}
+      />
 
       {/* Main Chat Scroll Region */}
       <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-6 space-y-4">
