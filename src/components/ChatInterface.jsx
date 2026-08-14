@@ -3,16 +3,29 @@ import { streamResponse, getScenario, listScenarios } from '../data/mock-stream.
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 import CoverageStrip from './CoverageStrip';
-import { BookOpen, RefreshCw, MessageSquare, Layers } from 'lucide-react';
+import { BookOpen, RefreshCw, MessageSquare, Layers, X } from 'lucide-react';
+import logoImg from '../data/ChatGPT Image Aug 14, 2026, 10_37_07 PM (1).png';
 
 export function ChatInterface({ onCitationClick, selectedCitation, lectures, savedMessages = [], onToggleSave, onOpenSavedDeck, askSlidePrompt, onClearAskSlidePrompt, initialConversation, conversationMode, onToggleConversationMode }) {
   const [messages, setMessages] = useState(initialConversation?.messages || []);
   const [isStreaming, setIsStreaming] = useState(false);
   const [selectedScenario, setSelectedScenario] = useState('plain');
+  const [isLogoModalOpen, setIsLogoModalOpen] = useState(false);
   
   const abortControllerRef = useRef(null);
   const messagesEndRef = useRef(null);
   const mainScrollRef = useRef(null);
+
+  // ESC key handler for logo modal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && isLogoModalOpen) {
+        setIsLogoModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isLogoModalOpen]);
 
   // Reset messages when initialConversation changes (toggle between empty/populated feeds)
   useEffect(() => {
@@ -296,9 +309,18 @@ export function ChatInterface({ onCitationClick, selectedCitation, lectures, sav
         <div className="max-w-4xl mx-auto flex items-center justify-between gap-2">
           {/* Logo & Course Badge on Left */}
           <div className="flex items-center space-x-2.5">
-            <div className="w-7 h-7 rounded bg-primary-container flex items-center justify-center text-on-primary-container font-mono font-bold text-xs shrink-0">
-              ML
-            </div>
+            <button
+              type="button"
+              onClick={() => setIsLogoModalOpen(true)}
+              className="cursor-pointer hover:opacity-95 hover:scale-105 active:scale-95 transition-all focus:outline-none shrink-0"
+              title="Click to view full logo emblem"
+            >
+              <img
+                src={logoImg}
+                alt="CS 4780 Logo"
+                className="w-7 h-7 rounded object-cover border border-outline-variant/60 shadow-sm"
+              />
+            </button>
             <div>
               <h1 className="text-xs sm:text-sm font-semibold text-on-surface leading-tight">
                 CS 4780<span className="hidden sm:inline">: Machine Learning</span>
@@ -358,9 +380,18 @@ export function ChatInterface({ onCitationClick, selectedCitation, lectures, sav
               {/* Course & Student Identity Card */}
               <div className="w-full p-3.5 sm:p-4 bg-surface-container-low border border-outline-variant/60 rounded-xl space-y-2.5 text-left">
                 <div className="flex items-center space-x-3">
-                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container font-mono font-bold text-xs shrink-0">
-                    {initialConversation?.course?.code?.split(' ')[0] || 'ML'}
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsLogoModalOpen(true)}
+                    className="cursor-pointer hover:opacity-95 hover:scale-105 active:scale-95 transition-all focus:outline-none shrink-0"
+                    title="Click to view full logo emblem"
+                  >
+                    <img
+                      src={logoImg}
+                      alt="CS 4780 Logo"
+                      className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg object-cover border border-outline-variant/60 shadow-sm"
+                    />
+                  </button>
                   <div>
                     <p className="text-xs sm:text-sm font-semibold text-on-surface">
                       {initialConversation?.course?.code || 'Course'}: {initialConversation?.course?.title || 'Machine Learning'}
@@ -438,6 +469,40 @@ export function ChatInterface({ onCitationClick, selectedCitation, lectures, sav
           onOpenSavedDeck={onOpenSavedDeck}
         />
       </div>
+
+      {/* FULL-SIZE LOGO LIGHTBOX MODAL */}
+      {isLogoModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+          onClick={() => setIsLogoModalOpen(false)}
+        >
+          <div
+            className="relative bg-surface-container-high border border-outline-variant rounded-2xl p-4 max-w-sm sm:max-w-md w-full flex flex-col items-center space-y-4 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-full flex items-center justify-between border-b border-outline-variant/40 pb-2">
+              <span className="text-xs font-mono text-primary font-bold uppercase tracking-wider">
+                THE PRISM SCHOLAR
+              </span>
+              <button
+                onClick={() => setIsLogoModalOpen(false)}
+                className="p-1 rounded bg-surface-container-highest text-on-surface-variant hover:text-on-surface transition-colors"
+                title="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <img
+              src={logoImg}
+              alt="The Prism Scholar Logo"
+              className="max-h-[65vh] w-auto rounded-xl border border-outline-variant/60 object-contain shadow-lg"
+            />
+            <p className="text-xs font-mono text-on-surface-variant text-center">
+              Refracting Complex Intelligence into Crystal-Clear Insight
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
