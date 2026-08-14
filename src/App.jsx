@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import ChatInterface from './components/ChatInterface';
 import SourcePanel from './components/SourcePanel';
 import SavedDeck from './components/SavedDeck';
-import { MessageSquare, BookOpen } from 'lucide-react';
+import { MessageSquare, BookOpen, Layers } from 'lucide-react';
 
 import lec1 from './data/lectures/lecture-01-linear-models.json';
 import lec2 from './data/lectures/lecture-02-gradient-descent.json';
 import lec3 from './data/lectures/lecture-03-regularization.json';
+import conversationFull from './data/conversation.json';
+import conversationEmpty from './data/conversation-empty.json';
 
 const lectures = [lec1, lec2, lec3];
 
@@ -14,6 +16,9 @@ export default function App() {
   const [selectedCitation, setSelectedCitation] = useState(null);
   const [isSavedDeckOpen, setIsSavedDeckOpen] = useState(false);
   const [activeMobileTab, setActiveMobileTab] = useState('chat'); // 'chat' | 'sources'
+  const [conversationMode, setConversationMode] = useState('populated'); // 'populated' | 'empty'
+
+  const activeConversation = conversationMode === 'populated' ? conversationFull : conversationEmpty;
 
   // Initialize savedMessages from localStorage
   const [savedMessages, setSavedMessages] = useState(() => {
@@ -116,6 +121,9 @@ export default function App() {
           onOpenSavedDeck={() => setIsSavedDeckOpen(true)}
           askSlidePrompt={askSlidePrompt}
           onClearAskSlidePrompt={() => setAskSlidePrompt(null)}
+          initialConversation={activeConversation}
+          conversationMode={conversationMode}
+          onToggleConversationMode={() => setConversationMode(m => m === 'populated' ? 'empty' : 'populated')}
         />
       </div>
 
