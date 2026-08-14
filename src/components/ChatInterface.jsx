@@ -6,13 +6,23 @@ import ChatInput from './ChatInput';
 import CoverageStrip from './CoverageStrip';
 import { BookOpen, RefreshCw, MessageSquare } from 'lucide-react';
 
-export function ChatInterface({ onCitationClick, selectedCitation, lectures, savedMessages = [], onToggleSave, onOpenSavedDeck }) {
+export function ChatInterface({ onCitationClick, selectedCitation, lectures, savedMessages = [], onToggleSave, onOpenSavedDeck, askSlidePrompt, onClearAskSlidePrompt }) {
   const [messages, setMessages] = useState(initialConversation.messages || []);
   const [isStreaming, setIsStreaming] = useState(false);
   const [selectedScenario, setSelectedScenario] = useState('plain');
   
   const abortControllerRef = useRef(null);
   const messagesEndRef = useRef(null);
+
+  // Listener for askSlidePrompt triggered from SourcePanel
+  useEffect(() => {
+    if (askSlidePrompt) {
+      handleSendMessage(askSlidePrompt);
+      if (onClearAskSlidePrompt) {
+        onClearAskSlidePrompt();
+      }
+    }
+  }, [askSlidePrompt]);
 
   // Auto-scroll to bottom as messages change or stream
   const scrollToBottom = () => {
@@ -34,13 +44,14 @@ export function ChatInterface({ onCitationClick, selectedCitation, lectures, sav
   // Keyword matching helper if user types instead of picking from dropdown
   const resolveScenarioId = (userText) => {
     const textLower = userText.toLowerCase();
+    if (textLower.includes('before') || textLower.includes('token') || textLower.includes('instant error') || textLower.includes('disconnect')) return 'fails-before-token';
     if (textLower.includes('code') || textLower.includes('python')) return 'code';
     if (textLower.includes('math') || textLower.includes('sigmoid') || textLower.includes('derivative')) return 'math';
     if (textLower.includes('table') || textLower.includes('regularization')) return 'table';
     if (textLower.includes('long') || textLower.includes('backprop')) return 'long';
     if (textLower.includes('exam') || textLower.includes('grade')) return 'refusal';
     if (textLower.includes('error') || textLower.includes('midstream') || textLower.includes('fail')) return 'error-midstream';
-    if (textLower.includes('before') || textLower.includes('token') || textLower.includes('disconnect')) return 'fails-before-token';
+    if (textLower.includes('slow') || textLower.includes('summarise')) return 'slow';
     return selectedScenario;
   };
 
@@ -55,13 +66,6 @@ export function ChatInterface({ onCitationClick, selectedCitation, lectures, sav
       content: promptText,
     };
 
-    setMessages((prev) => [...prev, userMsg]);
-
-    // 2. Prepare AbortController & assistant response placeholder
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
-    setIsStreaming(true);
-
     const assistantMsgId = `ast-${Date.now()}`;
     let accumulatedText = '';
     let errorMessage = null;
@@ -69,10 +73,48 @@ export function ChatInterface({ onCitationClick, selectedCitation, lectures, sav
 
     try {
       const scenarioMeta = getScenario(targetScenarioId);
-      scenarioCitations = scenarioMeta.citations || [];
+      scenarioCitations = scenarioMeta.citations ? [...scenarioMeta.citations] : [];
     } catch (e) {
       scenarioCitations = [];
     }
+
+    // If this is an "Ask Tutor About This Slide" prompt, extract exact week and slide number for dynamic citation
+    const slideMatch = promptText.match(/Slide\s*(\d+)/i);
+    const weekMatch = promptText.match(/Week\s*(\d+)/i);
+
+    if (slideMatch && weekMatch) {
+      const askedWeek = parseInt(weekMatch[1], 10);
+      const askedSlide = parseInt(slideMatch[1], 10);
+      
+      const targetLec = lectures ? lectures.find((l) => Number(l.week) === askedWeek) : null;
+      const lecTitle = targetLec ? targetLec.title : `Lecture`;
+
+      scenarioCitations = [
+        {
+          lecture: `Week ${askedWeek} — ${lecTitle}`,
+          week: askedWeek,
+          slide: askedSlide,
+        },
+      ];
+    }
+
+    // Append user prompt AND assistant placeholder immediately
+    setMessages((prev) => [
+      ...prev,
+      userMsg,
+      {
+        id: assistantMsgId,
+        role: 'assistant',
+        sender: 'tutor',
+        content: '',
+        citations: scenarioCitations,
+      },
+    ]);
+
+    // 2. Prepare AbortController & stream generator
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    setIsStreaming(true);
 
     try {
       // Stream generator execution
@@ -82,22 +124,13 @@ export function ChatInterface({ onCitationClick, selectedCitation, lectures, sav
         accumulatedText += chunk;
 
         // Append chunk to growing assistant message bubble in real time
-        setMessages((prev) => {
-          const exists = prev.some((m) => m.id === assistantMsgId);
-          const updatedAssistantMsg = {
-            id: assistantMsgId,
-            role: 'assistant',
-            sender: 'tutor',
-            content: accumulatedText,
-            citations: scenarioCitations,
-          };
-
-          if (exists) {
-            return prev.map((m) => (m.id === assistantMsgId ? updatedAssistantMsg : m));
-          } else {
-            return [...prev, updatedAssistantMsg];
-          }
-        });
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === assistantMsgId
+              ? { ...m, content: accumulatedText, citations: scenarioCitations }
+              : m
+          )
+        );
       }
     } catch (err) {
       if (!controller.signal.aborted) {
@@ -162,11 +195,8 @@ export function ChatInterface({ onCitationClick, selectedCitation, lectures, sav
               ML
             </div>
             <div>
-              <h1 className="text-sm font-semibold text-on-surface flex items-center gap-2">
-                <span>CS 4780: Machine Learning</span>
-                <span className="text-[10px] font-mono px-1.5 py-0.5 bg-surface-container-high border border-outline-variant/60 rounded text-primary">
-                  Active
-                </span>
+              <h1 className="text-sm font-semibold text-on-surface">
+                CS 4780: Machine Learning
               </h1>
               <p className="text-[11px] text-on-surface-variant font-mono">
                 Pedagogical Research Assistant &bull; Week 1-3

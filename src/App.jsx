@@ -61,6 +61,16 @@ export default function App() {
     setSavedMessages((prev) => prev.filter((m) => m.id !== messageId));
   };
 
+  const [askSlidePrompt, setAskSlidePrompt] = useState(null);
+
+  const handleAskAboutSlide = (slide, lecture) => {
+    if (!slide || !lecture) return;
+    const slideNum = slide.slide_number ?? slide.slideNumber;
+    const prompt = `Can you explain Slide ${slideNum}: "${slide.title}" from Week ${lecture.week} (${lecture.title})?`;
+    setAskSlidePrompt(prompt);
+    setActiveMobileTab('chat');
+  };
+
   return (
     <div className="flex flex-col lg:flex-row h-screen overflow-hidden bg-background text-on-surface font-sans">
       {/* MOBILE TOP TAB BAR (Shown only on < lg screens replacing desktop split view) */}
@@ -104,6 +114,8 @@ export default function App() {
           savedMessages={savedMessages}
           onToggleSave={handleToggleSave}
           onOpenSavedDeck={() => setIsSavedDeckOpen(true)}
+          askSlidePrompt={askSlidePrompt}
+          onClearAskSlidePrompt={() => setAskSlidePrompt(null)}
         />
       </div>
 
@@ -115,6 +127,7 @@ export default function App() {
             lectures={lectures}
             onCloseMobile={handleCloseMobile}
             isMobileFullTab={true}
+            onAskAboutSlide={handleAskAboutSlide}
           />
         </div>
       )}
@@ -124,6 +137,7 @@ export default function App() {
         selectedCitation={selectedCitation}
         lectures={lectures}
         onCloseMobile={handleCloseMobile}
+        onAskAboutSlide={handleAskAboutSlide}
       />
 
       {/* SAVED STUDY DECK MODAL */}

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { findSlide } from '../data/lectureLookup';
 import { BlockMath, InlineMath } from 'react-katex';
-import { BookOpen, X, ChevronRight, FileText, Sparkles, Image } from 'lucide-react';
+import { BookOpen, X, ChevronRight, FileText, Sparkles, Image, MessageSquare, HelpCircle } from 'lucide-react';
 
 /**
  * SourcePanel Component
@@ -10,12 +10,14 @@ import { BookOpen, X, ChevronRight, FileText, Sparkles, Image } from 'lucide-rea
  * Displays the cited slide details retrieved via findSlide(citation, lectures).
  * Handles desktop right-side persistent panel and mobile bottom sheet overlay with spring animations.
  */
-export function SourcePanel({ selectedCitation, lectures, onCloseMobile, isMobileFullTab = false }) {
+export function SourcePanel({ selectedCitation, lectures, onCloseMobile, isMobileFullTab = false, conversationMessages = [], onAskAboutSlide }) {
   const [slide, setSlide] = useState(null);
   const [targetLecture, setTargetLecture] = useState(null);
   const [flashHighlight, setFlashHighlight] = useState(false);
+  const [showAlreadyAskedModal, setShowAlreadyAskedModal] = useState(false);
 
   useEffect(() => {
+    setShowAlreadyAskedModal(false);
     if (selectedCitation && lectures) {
       const foundSlide = findSlide(selectedCitation, lectures);
       setSlide(foundSlide);
@@ -40,6 +42,31 @@ export function SourcePanel({ selectedCitation, lectures, onCloseMobile, isMobil
       setTargetLecture(null);
     }
   }, [selectedCitation, lectures]);
+
+  // Check if current slide has already been asked in the conversation
+  const isAlreadyAsked = React.useMemo(() => {
+    if (!slide || !targetLecture || !Array.isArray(conversationMessages)) return false;
+    const weekNum = targetLecture.week;
+    const slideNum = slide.slide_number ?? slide.slideNumber;
+
+    return conversationMessages.some((msg) =>
+      Array.isArray(msg.citations) &&
+      msg.citations.some((c) => {
+        const cSlide = c.slide ?? c.slide_number ?? c.slideNumber;
+        const cMatch = c.lecture ? c.lecture.match(/Week\s*(\d+)/i) : null;
+        const cWeek = cMatch ? parseInt(cMatch[1], 10) : c.week;
+        return Number(cWeek) === Number(weekNum) && Number(cSlide) === Number(slideNum);
+      })
+    );
+  }, [slide, targetLecture, conversationMessages]);
+
+  const handleAskClick = () => {
+    if (isAlreadyAsked) {
+      setShowAlreadyAskedModal(true);
+    } else if (onAskAboutSlide) {
+      onAskAboutSlide(slide, targetLecture);
+    }
+  };
 
   // Content Renderer Component
   const renderPanelContent = () => {
@@ -168,6 +195,57 @@ export function SourcePanel({ selectedCitation, lectures, onCloseMobile, isMobil
             </p>
           </div>
         )}
+
+        {/* SPECIAL ALREADY-ASKED MODAL CARD */}
+        {showAlreadyAskedModal && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="p-4 bg-surface-container-high border border-primary/50 rounded-lg space-y-3 text-xs font-sans shadow-xl my-3"
+          >
+            <div className="flex items-center space-x-2 text-primary font-mono font-semibold">
+              <Sparkles className="w-4 h-4 text-primary" />
+              <span>Slide Already Covered in Session</span>
+            </div>
+            <p className="text-on-surface-variant text-[11px] leading-relaxed">
+              Slide {slideNum} (<em>"{slide.title}"</em>) has already been cited & covered in your active study session. Would you like to ask a follow-up question about this slide to deepen your understanding?
+            </p>
+            <div className="flex items-center space-x-2 pt-1">
+              <button
+                onClick={() => {
+                  setShowAlreadyAskedModal(false);
+                  if (onAskAboutSlide) onAskAboutSlide(slide, targetLecture);
+                }}
+                className="px-3 py-1.5 bg-primary-container text-on-primary-container font-mono text-[11px] font-bold rounded hover:bg-primary-container/90 transition-colors shadow-sm"
+              >
+                Ask Follow-Up Question
+              </button>
+              <button
+                onClick={() => setShowAlreadyAskedModal(false)}
+                className="px-3 py-1.5 bg-surface-container border border-outline-variant text-on-surface-variant font-mono text-[11px] rounded hover:text-on-surface transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ACTION BUTTON: Ask Tutor About This Slide */}
+        <div className="pt-3 border-t border-outline-variant/40">
+          <button
+            onClick={handleAskClick}
+            className={`w-full py-2.5 px-4 font-mono text-xs font-bold rounded-md flex items-center justify-center space-x-2 transition-all shadow-md active:scale-95 ${
+              isAlreadyAsked
+                ? 'bg-surface-container-high border border-primary/50 text-primary hover:bg-surface-container-highest'
+                : 'bg-primary-container hover:bg-primary-container/90 text-on-primary-container'
+            }`}
+          >
+            <MessageSquare className="w-4 h-4" />
+            <span>
+              {isAlreadyAsked ? 'Ask Follow-up on This Slide' : 'Ask Tutor About This Slide'}
+            </span>
+          </button>
+        </div>
       </div>
     );
   };
@@ -183,11 +261,6 @@ export function SourcePanel({ selectedCitation, lectures, onCloseMobile, isMobil
               Slide Source Viewer
             </span>
           </div>
-          {slide && (
-            <span className="text-[10px] font-mono px-2 py-0.5 bg-primary-container/20 text-primary border border-primary/40 rounded">
-              Active Slide
-            </span>
-          )}
         </div>
         <div className="flex-1 overflow-y-auto">
           {renderPanelContent()}
@@ -208,11 +281,6 @@ export function SourcePanel({ selectedCitation, lectures, onCloseMobile, isMobil
               Slide Source Viewer
             </span>
           </div>
-          {slide && (
-            <span className="text-[10px] font-mono px-2 py-0.5 bg-primary-container/20 text-primary border border-primary/40 rounded">
-              Active Slide
-            </span>
-          )}
         </div>
 
         {/* Content Container */}

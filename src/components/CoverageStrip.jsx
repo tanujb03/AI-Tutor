@@ -154,9 +154,22 @@ export function CoverageStrip({ messages, lectures, isStreaming, onSlideSelect }
             className="overflow-hidden border-t border-outline-variant/40 bg-surface-container-lowest/90 px-4 py-4"
           >
             <div className="max-w-4xl mx-auto space-y-4">
-              <div className="flex items-center justify-between text-xs text-on-surface-variant font-mono">
+              <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-on-surface-variant font-mono">
                 <span>Click any slide chip to load its source slide into the viewer</span>
-                <span className="text-[10px] text-outline">DESIGN.md Chip Legend: Outline = Touched | Solid = Revisited</span>
+                <div className="flex items-center space-x-3 text-[11px]">
+                  <span className="flex items-center gap-1 text-on-surface-variant" title="Not Asked: Slide has not been cited yet in tutor answers">
+                    <span className="w-2 h-2 rounded-full border border-outline-variant" />
+                    <span><strong>Not Asked</strong> (0 citations)</span>
+                  </span>
+                  <span className="flex items-center gap-1 text-primary" title="Touched: Cited once in tutor answers">
+                    <span className="w-2 h-2 rounded-full border border-primary" />
+                    <span><strong>Touched</strong> (1 citation)</span>
+                  </span>
+                  <span className="flex items-center gap-1 text-primary" title="Revisited: Cited 2 or more times across questions">
+                    <span className="w-2 h-2 rounded-full bg-primary" />
+                    <span><strong>Revisited</strong> (2+ citations)</span>
+                  </span>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

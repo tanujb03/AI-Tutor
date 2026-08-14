@@ -126,8 +126,8 @@ export function ChatMessage({ message, isStreaming, onRetry, onCitationClick, se
         )}
       </div>
 
-      {/* Citations Row (if available) */}
-      {Array.isArray(message.citations) && message.citations.length > 0 && (
+      {/* Citations Row (only render once first token has arrived) */}
+      {Array.isArray(message.citations) && message.citations.length > 0 && message.content && message.content.trim().length > 0 && (
         <div className="pt-2 border-t border-outline-variant/30 flex flex-wrap items-center gap-2 mt-3">
           <span className="text-[10px] font-mono text-outline uppercase tracking-wider flex items-center gap-1 mr-1">
             <Bookmark className="w-3 h-3 text-primary" />

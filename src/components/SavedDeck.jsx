@@ -63,22 +63,22 @@ export function SavedDeck({ savedMessages, lectures, onRemoveSaved, onCitationCl
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 12 }}
         transition={{ type: 'spring', stiffness: 320, damping: 28 }}
-        className="relative z-10 w-full max-w-3xl max-h-[85vh] bg-surface border border-outline-variant rounded-xl flex flex-col shadow-2xl overflow-hidden font-sans"
+        className="relative z-10 w-full max-w-5xl max-h-[90vh] bg-surface border border-outline-variant rounded-xl flex flex-col shadow-2xl overflow-hidden font-sans"
       >
         {/* Header */}
-        <div className="px-5 py-4 bg-surface-container-low border-b border-outline-variant/60 flex items-center justify-between">
+        <div className="px-6 py-4 bg-surface-container-low border-b border-outline-variant/60 flex items-center justify-between">
           <div className="flex items-center space-x-2.5">
             <div className="p-1.5 rounded bg-primary-container/20 text-primary border border-primary/40">
               <Bookmark className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-on-surface flex items-center gap-2">
+              <h2 className="text-base font-semibold text-on-surface flex items-center gap-2">
                 <span>Saved Study Deck</span>
                 <span className="text-[10px] font-mono px-2 py-0.5 bg-primary-container text-on-primary-container font-bold rounded">
                   {savedMessages.length} {savedMessages.length === 1 ? 'item' : 'items'}
                 </span>
               </h2>
-              <p className="text-[11px] text-on-surface-variant font-mono">
+              <p className="text-xs text-on-surface-variant font-mono">
                 Bookmarked Tutor Answers & Citations Grouped by Lecture
               </p>
             </div>
@@ -86,38 +86,38 @@ export function SavedDeck({ savedMessages, lectures, onRemoveSaved, onCitationCl
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant hover:text-on-surface transition-colors"
+            className="p-2 rounded bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant hover:text-on-surface transition-colors"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Body Content */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-6">
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {savedMessages.length === 0 ? (
             /* EMPTY STATE */
-            <div className="py-16 text-center text-on-surface-variant space-y-3">
-              <div className="w-10 h-10 rounded-md bg-surface-container-high border border-outline-variant/60 flex items-center justify-center text-outline mx-auto">
-                <Bookmark className="w-5 h-5" />
+            <div className="py-20 text-center text-on-surface-variant space-y-3">
+              <div className="w-12 h-12 rounded-md bg-surface-container-high border border-outline-variant/60 flex items-center justify-center text-outline mx-auto">
+                <Bookmark className="w-6 h-6" />
               </div>
-              <h3 className="text-sm font-semibold text-on-surface">Nothing saved yet</h3>
+              <h3 className="text-base font-semibold text-on-surface">Nothing saved yet</h3>
               <p className="text-xs text-on-surface-variant max-w-sm mx-auto leading-relaxed">
-                Tap the bookmark icon (<Bookmark className="w-3 h-3 inline text-primary" />) on any tutor answer in the chat to save key formulas and takeaways to your study deck.
+                Tap the bookmark icon (<Bookmark className="w-3.5 h-3.5 inline text-primary" />) on any tutor answer in the chat to save key formulas and takeaways to your study deck.
               </p>
             </div>
           ) : (
             /* POPULATED GROUPS */
             groupedDeck.map((group, gIdx) => (
-              <div key={gIdx} className="space-y-3">
+              <div key={gIdx} className="space-y-4">
                 {/* Group Header */}
-                <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-primary border-b border-outline-variant/40 pb-1.5">
-                  <BookOpen className="w-3.5 h-3.5" />
-                  <span className="font-bold">{group.title}</span>
-                  <span className="text-[10px] text-outline">({group.items.length})</span>
+                <div className="flex items-center space-x-2 text-xs font-mono uppercase tracking-wider text-primary border-b border-outline-variant/40 pb-2">
+                  <BookOpen className="w-4 h-4" />
+                  <span className="font-bold text-sm">{group.title}</span>
+                  <span className="text-xs text-outline">({group.items.length})</span>
                 </div>
 
                 {/* Cards List */}
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {group.items.map((item) => (
                     <motion.div
                       key={item.id}
@@ -125,10 +125,10 @@ export function SavedDeck({ savedMessages, lectures, onRemoveSaved, onCitationCl
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ duration: 0.2 }}
-                      className="p-4 bg-surface-container-low border border-outline-variant/60 rounded-lg space-y-3 shadow-sm hover:border-outline transition-colors"
+                      className="p-5 bg-surface-container-low border border-outline-variant/60 rounded-xl space-y-4 shadow-sm hover:border-outline transition-colors"
                     >
                       {/* Answer Excerpt */}
-                      <div className="text-xs text-on-surface leading-relaxed max-h-36 overflow-y-auto pr-1">
+                      <div className="text-sm text-on-surface leading-relaxed max-h-[60vh] overflow-y-auto pr-2">
                         <MathMarkdown content={item.content} />
                       </div>
 
