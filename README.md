@@ -1,4 +1,4 @@
-# Prism — Pedagogical Research Assistant
+# Prism — AI Tutor
 
 A citation-grounded learning interface built for CS 4780: Machine Learning for Engineers.
 
@@ -73,23 +73,30 @@ Visual direction and theme were brainstormed using Mixboard. Screen layouts, dar
 - **User Authentication**: Student identities (`Ben Tanaka` / `Ana Reyes`) are loaded directly from static JSON datasets to focus scope on frontend interaction requirements.
 - **PDF Canvas Rendering**: Lecture slides are rendered as structured JSON cards containing KaTeX math formulas and syntax-highlighted code blocks rather than embedding heavy PDF canvas elements.
 
-## What's Still Broken
-
+## What's Still Broken / Known Limitations
 None currently known. Every bug found during QA (listed below) was fixed before submission.
 
-## QA Process & Resolved Bugs
+### Mock Scenarios Count & IDs
+The mock streaming file `responses.json` contains exactly **9 scenarios**:
+1. `plain`
+2. `code`
+3. `math`
+4. `table`
+5. `long`
+6. `refusal`
+7. `error-midstream`
+8. `slow`
+9. `fails-before-token`
 
-A full QA walkthrough was conducted across all 9 mock streaming scenarios (8 shipped with the spec; `fails-before-token` was added to explicitly test pre-first-token failure), both conversation feeds (`conversation.json`, `conversation-empty.json`), and mobile viewports. Scenarios tested:
-
-`plain`, `code`, `math`, `table`, `long`, `refusal`, `error-midstream`, `slow`, `fails-before-token`
-
-Bugs identified and fixed during testing:
+### QA Pass & Resolved Bugs
+A full QA walkthrough was conducted across all 9 streaming scenarios, historical feeds (`conversation.json`), empty state (`conversation-empty.json`), and mobile viewports. Bugs identified and fixed during testing:
 
 - **Formula Double-Rendering Bug**: Math formulas were double-rendering because both raw LaTeX regex replacement and `ReactMarkdown` KaTeX plugins processed `$$` blocks. Fixed by consolidating math rendering into a single `MathMarkdown` component.
 - **Paragraph Streaming Flicker Bug**: CSS entry animations applied to `<p>` tags caused visible flickering because `ReactMarkdown` re-created DOM nodes on every streamed token. Fixed by animating at the message container level using Framer Motion.
 - **Scenario Error Hijacking Bug**: Academic prompts containing the word "error" (e.g., "What is error analysis?") triggered mock failure modes. Fixed by adding explicit prompt guards in `resolveScenarioId`.
 - **Mobile Dropdown Clipping Bug**: Native `<select>` elements and long scenario prompt strings overflowed mobile viewports and hid the Saved Deck button. Fixed by implementing a custom scrollable popover dropdown with `max-h-56` and responsive flex layout.
 
+All bugs identified during testing were fixed. No unresolved functional bugs remain in the codebase.
 
 ## Tech Stack
 
