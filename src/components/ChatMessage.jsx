@@ -75,8 +75,9 @@ export function ChatMessage({ message, isStreaming, onRetry, onCitationClick, se
   // Assistant Message (Left-aligned flowing document text - NOT bubble-wrapped)
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
       className="my-6 max-w-3xl space-y-3"
     >
       {/* Header Label & Bookmark Action */}

@@ -12,6 +12,8 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 export function MathMarkdown({ content, isStreaming }) {
   if (!content) return null;
 
+
+
   const mathStore = [];
 
   // 1. Extract BLOCK MATH $$...$$ FIRST so $$ is never confused with inline math $...$
