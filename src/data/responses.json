@@ -93,7 +93,16 @@
       "chunk_delay_ms": 15,
       "text": "Let's go through the midterm question by question. The first one asked you to state the gradient descent update rule and explain what the learning rate controls, which most of the class",
       "error": "The connection to the tutor was lost.",
-      "citations": []
+      "citations": [
+        {
+          "lecture": "Week 2 — Gradient Descent and Backpropagation",
+          "slide": 3
+        },
+        {
+          "lecture": "Week 2 — Gradient Descent and Backpropagation",
+          "slide": 4
+        }
+      ]
     },
     {
       "id": "slow",

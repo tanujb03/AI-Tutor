@@ -43,15 +43,21 @@ export function ChatInterface({ onCitationClick, selectedCitation, lectures, sav
 
   // Keyword matching helper if user types instead of picking from dropdown
   const resolveScenarioId = (userText) => {
+    // If this is an "Ask Tutor About This Slide" prompt, never hijack it into mock error scenarios
+    if (userText.startsWith('Can you explain Slide')) {
+      return selectedScenario === 'error-midstream' || selectedScenario === 'fails-before-token' ? 'plain' : selectedScenario;
+    }
+
     const textLower = userText.toLowerCase();
-    if (textLower.includes('before') || textLower.includes('token') || textLower.includes('instant error') || textLower.includes('disconnect')) return 'fails-before-token';
-    if (textLower.includes('code') || textLower.includes('python')) return 'code';
-    if (textLower.includes('math') || textLower.includes('sigmoid') || textLower.includes('derivative')) return 'math';
-    if (textLower.includes('table') || textLower.includes('regularization')) return 'table';
-    if (textLower.includes('long') || textLower.includes('backprop')) return 'long';
-    if (textLower.includes('exam') || textLower.includes('grade')) return 'refusal';
-    if (textLower.includes('error') || textLower.includes('midstream') || textLower.includes('fail')) return 'error-midstream';
-    if (textLower.includes('slow') || textLower.includes('summarise')) return 'slow';
+    if (textLower.includes('fails-before-token') || textLower.includes('instant error')) return 'fails-before-token';
+    if (textLower.includes('error-midstream') || textLower.includes('midstream error') || textLower.includes('connection lost')) return 'error-midstream';
+    if (textLower.includes('code scenario') || textLower.includes('show me how gradient descent is implemented')) return 'code';
+    if (textLower.includes('math scenario') || textLower.includes('why is the sigmoid derivative at most 0.25')) return 'math';
+    if (textLower.includes('table scenario') || textLower.includes('compare the regularization techniques')) return 'table';
+    if (textLower.includes('long scenario') || textLower.includes('explain everything about backprop')) return 'long';
+    if (textLower.includes('refusal scenario') || textLower.includes('when is the final exam')) return 'refusal';
+    if (textLower.includes('slow scenario') || textLower.includes('summarise the whole course so far')) return 'slow';
+
     return selectedScenario;
   };
 
@@ -185,6 +191,31 @@ export function ChatInterface({ onCitationClick, selectedCitation, lectures, sav
     }
   };
 
+  const handleToggleSaveMsg = (msg) => {
+    let userQuestion = 'Student Question';
+    const msgIdx = messages.findIndex((m) => m.id === msg.id);
+    if (msgIdx > 0) {
+      for (let i = msgIdx - 1; i >= 0; i--) {
+        if (messages[i].role === 'user' || messages[i].sender === 'user') {
+          userQuestion = messages[i].content;
+          break;
+        }
+      }
+    }
+
+    const payload = {
+      id: msg.id,
+      userQuestion: userQuestion,
+      answerContent: msg.content || '',
+      citations: msg.citations || [],
+      savedAt: new Date().toISOString()
+    };
+
+    if (onToggleSave) {
+      onToggleSave(payload);
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background text-on-surface font-sans">
       {/* Navigation Header — fixed at top, never scrolls away */}
@@ -245,7 +276,7 @@ export function ChatInterface({ onCitationClick, selectedCitation, lectures, sav
                   onCitationClick={onCitationClick}
                   selectedCitation={selectedCitation}
                   isSaved={isSaved}
-                  onToggleSave={onToggleSave}
+                  onToggleSave={handleToggleSaveMsg}
                 />
               );
             })
