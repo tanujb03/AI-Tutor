@@ -12,6 +12,7 @@ export function ChatInterface({ onCitationClick, selectedCitation, lectures, sav
   
   const abortControllerRef = useRef(null);
   const messagesEndRef = useRef(null);
+  const mainScrollRef = useRef(null);
 
   // Reset messages when initialConversation changes (toggle between empty/populated feeds)
   useEffect(() => {
@@ -32,13 +33,19 @@ export function ChatInterface({ onCitationClick, selectedCitation, lectures, sav
     }
   }, [askSlidePrompt]);
 
-  // Auto-scroll to bottom as messages change or stream
+  // Auto-scroll logic: scroll to top when empty feed, scroll to bottom when messages exist/stream
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
-    scrollToBottom();
+    if (messages.length === 0) {
+      if (mainScrollRef.current) {
+        mainScrollRef.current.scrollTop = 0;
+      }
+    } else {
+      scrollToBottom();
+    }
   }, [messages, isStreaming]);
 
   // Handler for Stop button
@@ -285,23 +292,25 @@ export function ChatInterface({ onCitationClick, selectedCitation, lectures, sav
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-background text-on-surface font-sans">
       {/* Navigation Header — fixed at top, never scrolls away */}
-      <header className="shrink-0 bg-background/90 backdrop-blur-md border-b border-outline-variant/50 px-6 py-3 z-10">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-7 h-7 rounded bg-primary-container flex items-center justify-center text-on-primary-container font-mono font-bold text-xs">
+      <header className="shrink-0 bg-background/90 backdrop-blur-md border-b border-outline-variant/50 px-3 sm:px-6 py-2 sm:py-3 z-10">
+        <div className="max-w-4xl mx-auto flex items-center justify-between gap-2">
+          {/* Logo & Course Badge on Left */}
+          <div className="flex items-center space-x-2.5">
+            <div className="w-7 h-7 rounded bg-primary-container flex items-center justify-center text-on-primary-container font-mono font-bold text-xs shrink-0">
               ML
             </div>
             <div>
-              <h1 className="text-sm font-semibold text-on-surface">
-                CS 4780: Machine Learning
+              <h1 className="text-xs sm:text-sm font-semibold text-on-surface leading-tight">
+                CS 4780<span className="hidden sm:inline">: Machine Learning</span>
               </h1>
-              <p className="text-[11px] text-on-surface-variant font-mono">
+              <p className="text-[10px] sm:text-[11px] text-on-surface-variant font-mono hidden sm:block">
                 Pedagogical Research Assistant &bull; Week 1-3
               </p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2">
+          {/* Feed Control Buttons on Right */}
+          <div className="flex items-center space-x-2 shrink-0">
             {/* Feed Toggle Button */}
             {onToggleConversationMode && (
               <button
@@ -314,7 +323,7 @@ export function ChatInterface({ onCitationClick, selectedCitation, lectures, sav
                 title={conversationMode === 'populated' ? 'Switch to empty feed' : 'Switch to populated feed'}
               >
                 <Layers className="w-3 h-3" />
-                <span>{conversationMode === 'populated' ? 'Pre-loaded Feed' : 'Empty Feed'}</span>
+                <span>{conversationMode === 'populated' ? 'Pre-loaded' : 'Empty Feed'}</span>
               </button>
             )}
 
@@ -324,7 +333,7 @@ export function ChatInterface({ onCitationClick, selectedCitation, lectures, sav
               title="Reset conversation to initial state"
             >
               <RefreshCw className="w-3 h-3" />
-              <span>Reset Feed</span>
+              <span>Reset</span>
             </button>
           </div>
         </div>
@@ -341,19 +350,19 @@ export function ChatInterface({ onCitationClick, selectedCitation, lectures, sav
       </div>
 
       {/* Main Chat Scroll Region — flex-1 so it fills the remaining height, overflow-y-auto for scroll */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl w-full mx-auto px-4 py-6 space-y-4">
+      <main ref={mainScrollRef} className="flex-1 overflow-y-auto">
+        <div className="max-w-3xl w-full mx-auto px-4 py-4 sm:py-6 space-y-4">
           {messages.length === 0 ? (
             /* EMPTY STATE — uses metadata from initialConversation */
-            <div className="flex flex-col items-center justify-center py-20 text-center space-y-6 max-w-sm mx-auto">
+            <div className="flex flex-col items-center justify-start pt-2 pb-6 sm:py-6 text-center space-y-4 sm:space-y-5 max-w-md mx-auto">
               {/* Course & Student Identity Card */}
-              <div className="w-full p-4 bg-surface-container-low border border-outline-variant/60 rounded-xl space-y-3 text-left">
+              <div className="w-full p-3.5 sm:p-4 bg-surface-container-low border border-outline-variant/60 rounded-xl space-y-2.5 text-left">
                 <div className="flex items-center space-x-3">
-                  <div className="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container font-mono font-bold text-xs shrink-0">
+                  <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container font-mono font-bold text-xs shrink-0">
                     {initialConversation?.course?.code?.split(' ')[0] || 'ML'}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-on-surface">
+                    <p className="text-xs sm:text-sm font-semibold text-on-surface">
                       {initialConversation?.course?.code || 'Course'}: {initialConversation?.course?.title || 'Machine Learning'}
                     </p>
                     <p className="text-[11px] text-on-surface-variant font-mono">
@@ -362,7 +371,7 @@ export function ChatInterface({ onCitationClick, selectedCitation, lectures, sav
                   </div>
                 </div>
                 <div className="pt-2 border-t border-outline-variant/30 flex items-center space-x-2">
-                  <div className="w-6 h-6 rounded bg-surface-container-high border border-outline-variant/60 flex items-center justify-center text-[10px] font-mono text-on-surface-variant">
+                  <div className="w-5 h-5 sm:w-6 sm:h-6 rounded bg-surface-container-high border border-outline-variant/60 flex items-center justify-center text-[10px] font-mono text-on-surface-variant">
                     {(initialConversation?.student?.name || 'S').charAt(0)}
                   </div>
                   <span className="text-xs text-on-surface-variant">

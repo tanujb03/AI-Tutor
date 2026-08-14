@@ -288,52 +288,6 @@ export function SourcePanel({ selectedCitation, lectures, onCloseMobile, isMobil
           {renderPanelContent()}
         </div>
       </aside>
-
-      {/* MOBILE BOTTOM SHEET (Dismissible partial height overlay with spring transition) */}
-      <AnimatePresence>
-        {selectedCitation && (
-          <div className="lg:hidden fixed inset-0 z-50 flex flex-col justify-end">
-            {/* Backdrop overlay */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={onCloseMobile}
-              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
-            />
-
-            {/* Bottom Sheet Box with Spring Animation */}
-            <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className="relative z-10 bg-surface border-t border-outline-variant rounded-t-2xl max-h-[85vh] flex flex-col shadow-2xl overflow-hidden"
-            >
-              {/* Swipe Handle & Drag Indicator */}
-              <div className="w-full py-2 flex flex-col items-center justify-center bg-surface-container-low border-b border-outline-variant/40 shrink-0">
-                <div className="w-12 h-1.5 rounded-full bg-outline-variant/80 mb-1" />
-                <div className="w-full px-4 flex items-center justify-between text-xs">
-                  <span className="font-mono text-primary text-[11px] uppercase tracking-wider font-semibold">
-                    Source Slide Viewer
-                  </span>
-                  <button
-                    onClick={onCloseMobile}
-                    className="p-1 rounded bg-surface-container-high text-on-surface-variant hover:text-on-surface"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Sheet Body */}
-              <div className="overflow-y-auto p-2">
-                {renderPanelContent()}
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </>
   );
 }

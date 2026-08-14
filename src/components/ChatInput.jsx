@@ -1,28 +1,33 @@
-import React, { useState } from 'react';
-import { Send, Square, Play, Sparkles, Bookmark } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { Send, Square, Sparkles, Bookmark, ChevronDown, ChevronUp, Check } from 'lucide-react';
 import { listScenarios } from '../data/mock-stream.mjs';
 
 export function ChatInput({ onSendMessage, isStreaming, onStop, selectedScenario, setSelectedScenario, savedCount, onOpenSavedDeck }) {
   const scenarios = listScenarios();
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   const [promptText, setPromptText] = useState(() => {
     const found = scenarios.find((s) => s.id === selectedScenario);
     return found ? found.prompt : '';
   });
 
-  const handleScenarioChange = (e) => {
-    const newScenarioId = e.target.value;
-    setSelectedScenario(newScenarioId);
-    
-    const found = scenarios.find((s) => s.id === newScenarioId);
-    if (found) {
-      setPromptText(found.prompt);
-    }
-  };
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-  const handleSelectClick = () => {
-    const found = scenarios.find((s) => s.id === selectedScenario);
-    if (found && !promptText.trim()) {
+  const handleSelectScenario = (scId) => {
+    setSelectedScenario(scId);
+    setIsOpen(false);
+    const found = scenarios.find((s) => s.id === scId);
+    if (found) {
       setPromptText(found.prompt);
     }
   };
@@ -34,40 +39,78 @@ export function ChatInput({ onSendMessage, isStreaming, onStop, selectedScenario
     setPromptText('');
   };
 
+  const activeScenarioObj = scenarios.find((s) => s.id === selectedScenario) || scenarios[0];
+
   return (
-    <div className="sticky bottom-0 bg-background/95 backdrop-blur-md pt-3 pb-6 border-t border-outline-variant/40">
-      <div className="max-w-3xl mx-auto space-y-2">
-        {/* Top bar controls: Scenario Selector Dropdown & Saved Deck Tab Button */}
-        <div className="flex items-center justify-between text-xs px-1">
-          <div className="flex items-center space-x-2">
-            <span className="text-on-surface-variant font-mono uppercase text-[10px] tracking-wider flex items-center gap-1">
+    <div className="sticky bottom-0 bg-background/95 backdrop-blur-md pt-2 pb-4 sm:pb-6 border-t border-outline-variant/40">
+      <div className="max-w-3xl mx-auto space-y-2 px-2 sm:px-4">
+        {/* Top bar controls: Custom Scrollable Scenario Selector Dropdown & Saved Deck Tab Button */}
+        <div className="flex items-center justify-between text-xs gap-2">
+          {/* Custom Popover Dropdown Container */}
+          <div className="relative flex items-center min-w-0" ref={dropdownRef}>
+            <span className="text-on-surface-variant font-mono uppercase text-[10px] tracking-wider flex items-center gap-1 mr-1.5 shrink-0">
               <Sparkles className="w-3 h-3 text-primary" />
               Scenario:
             </span>
-            <select
-              value={selectedScenario}
-              onChange={handleScenarioChange}
-              onClick={handleSelectClick}
+
+            {/* Custom Dropdown Trigger Button */}
+            <button
+              type="button"
+              onClick={() => !isStreaming && setIsOpen((prev) => !prev)}
               disabled={isStreaming}
-              className="bg-surface-container-high text-on-surface border border-outline-variant/60 rounded px-2.5 py-1 text-xs font-mono focus:outline-none focus:border-primary disabled:opacity-50 cursor-pointer"
+              className="inline-flex items-center space-x-1.5 bg-surface-container-high text-on-surface border border-outline-variant/60 hover:border-primary rounded px-2.5 py-1 text-xs font-mono disabled:opacity-50 transition-colors truncate max-w-[160px] xs:max-w-[210px] sm:max-w-[320px]"
+              title="Click to select stream scenario"
             >
-              {scenarios.map((sc) => (
-                <option key={sc.id} value={sc.id}>
-                  {sc.id} — "{sc.prompt.substring(0, 30)}..."
-                </option>
-              ))}
-            </select>
+              <span className="truncate font-semibold text-primary">{activeScenarioObj.id}</span>
+              <span className="text-outline hidden xs:inline">&bull;</span>
+              <span className="truncate text-on-surface-variant text-[11px] hidden xs:inline">"{activeScenarioObj.prompt}"</span>
+              {isOpen ? <ChevronUp className="w-3.5 h-3.5 text-outline shrink-0 ml-auto" /> : <ChevronDown className="w-3.5 h-3.5 text-outline shrink-0 ml-auto" />}
+            </button>
+
+            {/* Custom Scrollable Options Popover Menu (Appears above input) */}
+            {isOpen && (
+              <div className="absolute bottom-full left-0 mb-1.5 w-72 xs:w-80 sm:w-96 max-h-56 overflow-y-auto bg-surface-container-high border border-outline-variant/80 rounded-lg shadow-2xl p-1 z-50 space-y-1 divide-y divide-outline-variant/20 scrollbar-thin">
+                {scenarios.map((sc) => {
+                  const isSelected = sc.id === selectedScenario;
+                  return (
+                    <button
+                      key={sc.id}
+                      type="button"
+                      onClick={() => handleSelectScenario(sc.id)}
+                      className={`w-full text-left px-3 py-2 rounded text-xs font-mono transition-colors flex items-start justify-between gap-2 ${
+                        isSelected
+                          ? 'bg-primary-container text-on-primary-container font-semibold'
+                          : 'text-on-surface hover:bg-surface-container-highest'
+                      }`}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center space-x-1.5">
+                          <span className={isSelected ? 'text-on-primary-container font-bold' : 'text-primary font-bold'}>
+                            {sc.id}
+                          </span>
+                        </div>
+                        <p className={`text-[11px] leading-snug line-clamp-2 mt-0.5 ${isSelected ? 'text-on-primary-container/90' : 'text-on-surface-variant'}`}>
+                          "{sc.prompt}"
+                        </p>
+                      </div>
+                      {isSelected && <Check className="w-4 h-4 text-on-primary-container shrink-0 mt-0.5" />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
-          {/* Saved Deck Trigger Tab Button */}
+          {/* Saved Deck Trigger Tab Button (Guaranteed Visible on Mobile) */}
           <button
             type="button"
             onClick={onOpenSavedDeck}
-            className="inline-flex items-center space-x-1.5 px-2.5 py-1 bg-surface-container-high hover:bg-surface-container-highest text-on-surface border border-outline-variant/60 hover:border-primary rounded text-xs font-mono transition-colors"
+            className="inline-flex items-center space-x-1.5 px-2.5 py-1 bg-surface-container-high hover:bg-surface-container-highest text-on-surface border border-outline-variant/60 hover:border-primary rounded text-xs font-mono transition-colors shrink-0"
             title="Open Saved Study Deck"
           >
-            <Bookmark className="w-3 h-3 text-primary fill-primary/30" />
-            <span>Saved Deck</span>
+            <Bookmark className="w-3 h-3 text-primary fill-primary/30 shrink-0" />
+            <span className="hidden xs:inline">Saved Deck</span>
+            <span className="xs:hidden">Saved</span>
             <span className="px-1.5 py-0.2 bg-primary-container text-on-primary-container text-[10px] font-bold rounded">
               {savedCount || 0}
             </span>
